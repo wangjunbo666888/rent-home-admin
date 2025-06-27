@@ -7,6 +7,7 @@ import request from '@/utils/request'
  * @param {string} data.password - 密码
  */
 export function login(data) {
+  console.log('login------登录信息-----', data)
   return request({
     url: '/auth/login',
     method: 'post',
