@@ -122,6 +122,7 @@ export default {
           loading.value = true
           try {
             await store.dispatch('user/login', loginForm)
+            await store.dispatch('user/getUserInfo')
             const redirect = route.query.redirect || '/'
             router.push(redirect)
             ElMessage.success('登录成功')
