@@ -226,43 +226,4 @@ const router = createRouter({
   scrollBehavior: () => ({ top: 0 })
 })
 
-/**
- * 路由守卫
- * 权限控制和登录验证
- */
-router.beforeEach((to, from, next) => {
-  // 设置页面标题
-  document.title = to.meta.title ? `${to.meta.title} - 房产中介管理系统` : '房产中介管理系统'
-  
-  // 获取token
-  const token = localStorage.getItem('token')
-  
-  // 白名单路由（不需要登录）
-  const whiteList = ['/login', '/404']
-  
-  if (token) {
-    if (to.path === '/login') {
-      // 已登录，跳转到首页
-      next({ path: '/' })
-    } else {
-      // 验证用户信息和权限
-      const userInfo = localStorage.getItem('userInfo')
-      if (userInfo) {
-        next()
-      } else {
-        // 获取用户信息失败，跳转登录
-        next(`/login?redirect=${to.path}`)
-      }
-    }
-  } else {
-    if (whiteList.includes(to.path)) {
-      // 白名单路由，直接访问
-      next()
-    } else {
-      // 未登录，跳转登录页
-      next(`/login?redirect=${to.path}`)
-    }
-  }
-})
-
 export default router 

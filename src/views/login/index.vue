@@ -123,11 +123,14 @@ export default {
           try {
             await store.dispatch('user/login', loginForm)
             await store.dispatch('user/getUserInfo')
+            
+            // 获取重定向地址，如果没有则跳转到首页
             const redirect = route.query.redirect || '/'
             router.push(redirect)
             ElMessage.success('登录成功')
           } catch (error) {
             console.log('登录失败:', error)
+            ElMessage.error(error.message || '登录失败')
           } finally {
             loading.value = false
           }

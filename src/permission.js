@@ -1,7 +1,7 @@
 import router from './router'
 import store from './store'
-import { ElMessage } from 'element-plus'
 import { getToken } from '@/utils/auth'
+import { ElMessage } from 'element-plus'
 
 // 白名单路由
 const whiteList = ['/login', '/404']
@@ -9,46 +9,48 @@ const whiteList = ['/login', '/404']
 /**
  * 路由守卫
  */
-router.beforeEach(async(to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   // 开始进度条
   // NProgress.start()
 
   // 设置页面标题
   document.title = to.meta.title ? `${to.meta.title} - 房产中介管理系统` : '房产中介管理系统'
 
-  // 获取token
   const hasToken = getToken()
-
+  
   if (hasToken) {
     if (to.path === '/login') {
       // 如果已登录，重定向到首页
       next({ path: '/' })
       // NProgress.done()
     } else {
-      // 确定用户是否已通过getUserInfo获得其权限角色
-      const hasRoles = store.getters['user/roles'] && store.getters['user/roles'].length > 0
-      if (hasRoles) {
-        next()
+      // 检查用户信息是否存在
+      const hasUserInfo = store.getters['user/userInfo']
+      
+      if (hasUserInfo) {
+        // 检查路由权限
+        if (to.meta && to.meta.roles) {
+          const userRoles = store.getters['user/roles']
+          const hasPermission = to.meta.roles.some(role => userRoles.includes(role))
+          
+          if (hasPermission) {
+            next()
+          } else {
+            ElMessage.error('没有访问权限')
+            next('/404')
+          }
+        } else {
+          next()
+        }
       } else {
         try {
           // 获取用户信息
-          const { roles } = await store.dispatch('user/getUserInfo')
-
-          // 基于角色生成可访问的路由映射
-          const accessRoutes = await store.dispatch('permission/generateRoutes', roles)
-
-          // 动态添加可访问路由
-          accessRoutes.forEach(route => {
-            router.addRoute(route)
-          })
-
-          // 确保addRoutes已完成
-          // 设置replace: true，这样导航就不会留下历史记录
+          await store.dispatch('user/getUserInfo')
           next({ ...to, replace: true })
         } catch (error) {
-          // 移除token并跳转登录页面重新登录
+          // 获取用户信息失败，清除token并跳转登录页
           await store.dispatch('user/resetToken')
-          ElMessage.error(error || '出现错误，请重新登录')
+          ElMessage.error(error.message || '获取用户信息失败，请重新登录')
           next(`/login?redirect=${to.path}`)
           // NProgress.done()
         }
@@ -57,7 +59,7 @@ router.beforeEach(async(to, from, next) => {
   } else {
     /* 没有token */
 
-    if (whiteList.indexOf(to.path) !== -1) {
+    if (whiteList.includes(to.path)) {
       // 在免登录白名单中，直接进入
       next()
     } else {

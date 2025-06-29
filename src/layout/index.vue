@@ -9,7 +9,7 @@
       <navbar />
       
       <!-- 标签栏 -->
-      <tags-view v-if="needTagsView" />
+      <!-- <tags-view v-if="needTagsView" /> -->
       
       <!-- 主内容区 -->
       <app-main />
@@ -22,7 +22,7 @@ import { computed } from 'vue'
 import { useStore } from 'vuex'
 import Navbar from './components/Navbar.vue'
 import Sidebar from './components/Sidebar/index.vue'
-import TagsView from './components/TagsView/index.vue'
+// import TagsView from './components/TagsView/index.vue'
 import AppMain from './components/AppMain.vue'
 
 export default {
@@ -30,18 +30,18 @@ export default {
   components: {
     Navbar,
     Sidebar,
-    TagsView,
+    // TagsView,
     AppMain
   },
   setup() {
     const store = useStore()
     
     const sidebar = computed(() => store.state.app.sidebar)
-    const needTagsView = computed(() => store.state.settings.tagsView)
+    // const needTagsView = computed(() => store.state.settings.tagsView)
     
     return {
-      sidebar,
-      needTagsView
+      sidebar
+      // ,needTagsView
     }
   }
 }

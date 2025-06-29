@@ -1,3 +1,5 @@
+import router from '@/router'
+
 /**
  * 使用meta.role判断当前用户是否有权限
  * @param roles
@@ -45,10 +47,17 @@ const mutations = {
 }
 
 const actions = {
+  /**
+   * 根据角色生成可访问的路由
+   * @param {Array} roles 用户角色
+   * @returns {Promise<Array>} 可访问的路由数组
+   */
   generateRoutes({ commit }, roles) {
     return new Promise(resolve => {
-      // 简化权限控制，所有角色都可以访问所有路由
-      const accessedRoutes = []
+      // 获取所有静态路由
+      const allRoutes = router.options.routes || []
+      // 如需做权限过滤，可用 filterAsyncRoutes(allRoutes, roles)
+      const accessedRoutes = allRoutes
       commit('SET_ROUTES', accessedRoutes)
       resolve(accessedRoutes)
     })

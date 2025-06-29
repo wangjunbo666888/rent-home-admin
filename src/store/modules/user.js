@@ -1,9 +1,9 @@
 import { login, logout, getUserInfo } from '@/api/auth'
-import { getToken, setToken, removeToken } from '@/utils/auth'
+import { getToken, setToken, removeToken, setUserInfo, removeUserInfo, getUserInfo as getLocalUserInfo } from '@/utils/auth'
 
 const state = {
   token: getToken(),
-  userInfo: null,
+  userInfo: getLocalUserInfo(),
   roles: [],
   permissions: []
 }
@@ -73,6 +73,10 @@ const actions = {
           commit('SET_ROLES', roles)
           commit('SET_PERMISSIONS', permissions)
           commit('SET_USER_INFO', userInfo)
+          
+          // 保存用户信息到 localStorage
+          setUserInfo(userInfo)
+          
           resolve(data)
         })
         .catch(error => {
@@ -87,13 +91,14 @@ const actions = {
       logout(state.token).then(() => {
         commit('SET_TOKEN', '')
         commit('SET_ROLES', [])
+        commit('CLEAR_USER_INFO')
         removeToken()
+        removeUserInfo()
         // 删除路由重置，因为resetRouter未定义
         // resetRouter()
 
         // reset visited views and cached views
-        // to fixed https://github.com/PanJiaChen/vue-element-admin/issues/2485
-        dispatch('tagsView/delAllViews', null, { root: true })
+        // dispatch('tagsView/delAllViews', null, { root: true })
 
         resolve()
       }).catch(error => {
@@ -107,6 +112,7 @@ const actions = {
     return new Promise(resolve => {
       commit('CLEAR_USER_INFO')
       removeToken()
+      removeUserInfo()
       resolve()
     })
   },
